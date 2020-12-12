@@ -3,6 +3,7 @@ import Nav from "./Nav"
 import SearchArea from "./SearchArea"
 import MovieList from "./MovieList"
 import Pagination from "./Pagination"
+import MovieInfo from "./MovieInfo"
  
 
 class App extends Component {
@@ -13,6 +14,7 @@ class App extends Component {
       searchTerm: '',
       totalResults: 0,
       currentPage: 1,
+      currentMovie: null,
       apiKey: process.env.REACT_APP_API
     }
     this.apiKey = process.env.REACT_APP_API
@@ -42,15 +44,26 @@ class App extends Component {
     })
   }
 
+  viewMovieInfo = (id) => {
+    const filteredMovie = this.state.movies.filter(movie => movie.id == id)
+
+    const newCurrentMovie = filteredMovie.length > 0 ? filteredMovie[0] : null
+
+    this.setState({ currentMovie: newCurrentMovie })
+  
+  }
+
+  closedMovie = () => {
+    this.setState({ currentMovie: null })
+  }
   render() {
     const numberPages = Math.floor(this.state.totalResults / 20); //Logic: number of pages per the amound per page
 
     return (      
       <div className="App">
         <Nav />
-        <SearchArea handleSubmit={this.handleSubmit} handleChange={this.handleChange}/>
-        <MovieList movies={this.state.movies} />
-        { this.state.totalResults > 20 ? <Pagination pages={numberPages} nextPage={this.nextPage} currentPage={this.state.currentPage}/> : ''}
+        {this.state.currentMovie == null ? <div><SearchArea handleSubmit={this.handleSubmit} handleChange={this.handleChange}/><MovieList viewMovieInfo={this.viewMovieInfo} movies={this.state.movies}/></div> : <MovieInfo currentMovie={this.state.currentMovie} closeMovieInfo={this.closeMovieInfo} />}
+        { this.state.totalResults > 20 && this.state.currentMovie == null ? <Pagination pages={numberPages} nextPage={this.nextPage} currentPage={this.state.currentPage}/> : ''}
       </div>
     );
   }
